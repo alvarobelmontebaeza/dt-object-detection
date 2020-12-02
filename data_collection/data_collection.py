@@ -84,6 +84,9 @@ environment = launch_env()
 
 policy = PurePursuitPolicy(environment)
 MAX_STEPS = 500
+MAX_DATA_SIZE = 2000
+dataset_size = 0
+
 
 while True:
     obs = environment.reset()
@@ -97,12 +100,20 @@ while True:
 
         obs, rew, done, misc = environment.step(action) # Gives non-segmented obs as numpy array
         segmented_obs = environment.render_obs(True)  # Gives segmented obs as numpy array
+        obs = np.resize(obs,(224,224,3))
+        segmented_obs = np.resize(segmented_obs,(224,224,3))
 
         rewards.append(rew)
         environment.render(segment=int(nb_of_steps / 50) % 2 == 0)
-
-        boxes, classes = clean_segmented_image(segmented_obs)
-        # TODO save_npz(obs, boxes, classes)
+        # Only save data every 10 iterations. This is done to try to avoid very similar images obtained
+        # consecutively
+        if nb_of_steps % 10 == 0.0:
+            boxes, classes = clean_segmented_image(segmented_obs)
+            save_npz(obs, boxes, classes)
+            dataset_size += 1
+            print('data sample %s collected' % dataset_size)
+            if dataset_size >= MAX_DATA_SIZE:
+                exit()
 
         nb_of_steps += 1
 
