@@ -1,9 +1,14 @@
+import numpy as np
+import os
+
 import torch
 import torchvision
 from engine import train_one_epoch
 import utils
 
 import transforms as T
+import model
+from model import Model
 
 class Dataset(object):
     def __init__(self, root, transforms):
@@ -48,9 +53,38 @@ def get_transform(train):
     return T.Compose(transforms)
 
 def main():
-    # TODO train loop here!
-    # TODO don't forget to save the model's weights inside of `./weights`!
-    pass
+    # Check for GPU availability during training
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    # Create dataset object, giving the root as the parent directory
+    dataset = Dataset('..', get_transform(train=True))
+    # Define training dataloader
+    data_loader = torch.utils.data.DataLoader(
+        dataset, batch_size=2,shuffle=True, num_workers=4, collate_fn=utils.collate_fn
+    )
+    # Define model
+    model = Model()
+    # Move model to the right device
+    model.to(device)
+    # Construct optimizer. (maybe try Adam?)
+    params = [p for p in model.parameters() if p.requires_grad]
+    optimizer = torch.optim.SGD(params, lr=0.005,
+                                momentum=0.9, weight_decay=0.0005)
+    # Constructs learning rate scheduler
+    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,step_size=3,gamma=0.1)
+
+    # Set number of epochs
+    num_epochs = 10
+
+    # Main training loop
+    for epoch in range(num_epochs):
+        # Try for one epoch and print every 10 iterations
+        train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq=10)
+        # Update learning rate
+        lr_scheduler.step()
+    
+    print('Training complete! Saving weights...')
+    torch.save(model.state_dict(), './weights')
+    print('Weights saved!')
 
 if __name__ == "__main__":
     main()
