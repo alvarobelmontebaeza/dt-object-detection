@@ -7,15 +7,14 @@ from engine import train_one_epoch
 import utils
 
 import transforms as T
-import model
 from model import Model
 
 class Dataset(object):
     def __init__(self, root, transforms):
-        self.root = root
+        self.path = root + "/data_collection/dataset"
         self.transforms = transforms
         # Load all npz files and extract data
-        self.dataset_files = list(sorted(filter(lambda x: "npz" in x, os.listdir(root + "/data_collection/dataset"))))
+        self.dataset_files = list(sorted(filter(lambda x: "npz" in x, os.listdir(self.path))))
         self.dataset_size = len(self.dataset_files)
     
     def __getitem__(self,idx):
@@ -26,7 +25,7 @@ class Dataset(object):
             exit()
         # Load the item required by the idx parameter
         file = str(idx) + '.npz'
-        with np.load(f'./dataset/{file}') as data:
+        with np.load(self.path + f'/{file}') as data:
             # Retrieve data
             img, boxes, classes = tuple([data[f"arr_{i}"] for i in range(3)])
             # Convert to tensor
@@ -59,7 +58,7 @@ def main():
     # Check for GPU availability during training
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     # Create dataset object, giving the root as the parent directory
-    dataset = Dataset('.', get_transform(train=True))
+    dataset = Dataset('..', None)
     # Define training dataloader
     data_loader = torch.utils.data.DataLoader(
         dataset, batch_size=1,shuffle=True, num_workers=4, collate_fn=utils.collate_fn

@@ -57,7 +57,7 @@ class Model(torch.nn.Module):
         model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
 
         # Get number of input features
-        in_features = model.roi_heads.box.predictor.cls_score.in_features
+        in_features = model.roi_heads.box_predictor.cls_score.in_features
         # Replace pre-trained head with a new one
         model.roi_heads.box_predictor = FastRCNNPredictor(in_features,5)
         # Create the model attribute
