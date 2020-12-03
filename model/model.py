@@ -1,6 +1,26 @@
 import torch
 from torchvision.transforms.functional import to_tensor
 
+import os
+
+class Dataset(object):
+    def __init__(self, root, transforms):
+        self.root = root
+        self.transforms = transforms
+        # Load all npz files and extract data
+        self.imgs = list(sorted(os.listdir(os.path.join(root, "../data_collection/dataset"))))
+    
+    def __getitem__(self,idx):
+        filename = '%s.npz' % idx
+        with np.load(f'./dataset/{file}') as data:
+            img, boxes, classes = tuple([data[f"arr_{i}"] for i in range(3)])
+
+            p_boxes, p_classes, p_scores = wrapper.predict(np.array([img]))
+
+            for j in range(len(p_boxes)):
+                pred_boxes += make_boxes(nb_batch+nb_img, p_classes[j], p_scores[j], p_boxes[j])
+            true_boxes += make_boxes(nb_batch+nb_img, classes, [1.0]*len(classes), boxes)
+
 
 class Wrapper:
     def __init__(self):

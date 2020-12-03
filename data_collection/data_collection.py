@@ -84,7 +84,7 @@ environment = launch_env()
 
 policy = PurePursuitPolicy(environment)
 MAX_STEPS = 500
-MAX_DATA_SIZE = 2000
+MAX_DATA_SIZE = 500
 dataset_size = 0
 
 
@@ -112,7 +112,7 @@ while True:
             save_npz(obs, boxes, classes)
             dataset_size += 1
             print('data sample %s collected' % dataset_size)
-            
+
             if dataset_size >= MAX_DATA_SIZE:
                 exit()
 
