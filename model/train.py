@@ -44,6 +44,9 @@ class Dataset(object):
 
         # Return image and data dictionary.
         return img, target
+    
+    def __len__(self):
+        return self.dataset_size
 
 def get_transform(train):
     transforms = []
@@ -56,10 +59,10 @@ def main():
     # Check for GPU availability during training
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     # Create dataset object, giving the root as the parent directory
-    dataset = Dataset('..', get_transform(train=True))
+    dataset = Dataset('.', get_transform(train=True))
     # Define training dataloader
     data_loader = torch.utils.data.DataLoader(
-        dataset, batch_size=2,shuffle=True, num_workers=4, collate_fn=utils.collate_fn
+        dataset, batch_size=1,shuffle=True, num_workers=4, collate_fn=utils.collate_fn
     )
     # Define model
     model = Model()
