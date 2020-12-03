@@ -84,7 +84,7 @@ environment = launch_env()
 
 policy = PurePursuitPolicy(environment)
 MAX_STEPS = 500
-MAX_DATA_SIZE = 500
+MAX_DATA_SIZE = 2000
 dataset_size = 0
 
 
@@ -107,11 +107,13 @@ while True:
         environment.render(segment=int(nb_of_steps / 50) % 2 == 0)
         # Only save data every 10 iterations. This is done to try to avoid very similar images obtained
         # consecutively
-        if nb_of_steps % 10 == 0.0:
+        if nb_of_steps % 1 == 0.0:
             boxes, classes = clean_segmented_image(segmented_obs)
-            save_npz(obs, boxes, classes)
-            dataset_size += 1
-            print('data sample %s collected' % dataset_size)
+            # Only store observations that have at least one class
+            if len(boxes) > 0:
+                save_npz(obs, boxes, classes)
+                dataset_size += 1
+                print('data sample %s collected' % dataset_size)
 
             if dataset_size >= MAX_DATA_SIZE:
                 exit()
