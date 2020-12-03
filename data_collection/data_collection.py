@@ -41,7 +41,7 @@ def clean_segmented_image(seg_img):
     # Initialize object class: 1=duckie 2=cone 3=truck 4=bus
     obj_class = 1
     # Create kernel for morphological operations
-    kernel = np.ones((5,5), np.uint8)
+    kernel = np.ones((3,3), np.uint8)
 
     # Look for contours of each object class. To do so, define ranges to filter out all pixels
     # that are not of that color. Then, clean the mask noise using an open morphological operation.
@@ -100,8 +100,8 @@ while True:
 
         obs, rew, done, misc = environment.step(action) # Gives non-segmented obs as numpy array
         segmented_obs = environment.render_obs(True)  # Gives segmented obs as numpy array
-        obs = np.resize(obs,(224,224,3))
-        segmented_obs = np.resize(segmented_obs,(224,224,3))
+        obs = cv2.resize(obs,(224,224))
+        segmented_obs = cv2.resize(segmented_obs,(224,224))
 
         rewards.append(rew)
         environment.render(segment=int(nb_of_steps / 50) % 2 == 0)
@@ -112,6 +112,7 @@ while True:
             save_npz(obs, boxes, classes)
             dataset_size += 1
             print('data sample %s collected' % dataset_size)
+            
             if dataset_size >= MAX_DATA_SIZE:
                 exit()
 
