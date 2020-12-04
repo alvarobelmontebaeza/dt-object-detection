@@ -57,18 +57,24 @@ def clean_segmented_image(seg_img):
         # Threshold the HSV image to get only current object color
         mask = cv2.inRange(hsv_img,lower_bound,upper_bound)
         # Perform a OPEN operation to remove remaining noise after filtering by color
-        clean_mask = cv2.morphologyEx(mask,cv2.MORPH_OPEN,kernel)
+        # clean_mask = cv2.morphologyEx(mask,cv2.MORPH_OPEN,kernel)
         # Find contours of present objects
-        contours, hierarchy = cv2.findContours(clean_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # Filter out contours smaller than a certain area
+        threshArea = 5**2 # 10 pix² areas as a minimum
+            
         # Put a bounding box on every contour and store its coordinates and class
         for cnt in contours:
             # Define bounding box
             x,y,w,h = cv2.boundingRect(cnt)
-            # Create box np.array with appropriate format
-            box = np.array([x, y, x+w, y+h])
-            # Store current box and class
-            boxes.append(box)
-            classes.append(obj_class)
+            # Store it if its area is bigger than threshold. This way, we can also avoid considering little
+            # contours caused by noise, without affecting the shape of the detected objects
+            if (w*h) > threshArea:
+                # Create box np.array with appropriate format
+                box = np.array([x, y, x+w, y+h])
+                # Store current box and class
+                boxes.append(box)
+                classes.append(obj_class)
         
         # Increase obj_class for next object class
         obj_class += 1
@@ -107,7 +113,7 @@ while True:
         environment.render(segment=int(nb_of_steps / 50) % 2 == 0)
         # Only save data every 10 iterations. This is done to try to avoid very similar images obtained
         # consecutively
-        if nb_of_steps % 1 == 0.0:
+        if nb_of_steps % 10 == 0.0:
             boxes, classes = clean_segmented_image(segmented_obs)
             # Only store observations that have at least one class
             if len(boxes) > 0:
