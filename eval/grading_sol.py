@@ -15,8 +15,8 @@ def make_boxes(id, labels, scores, bboxes):
     for i in range(len(labels)):
         x1 = bboxes[i][0]
         y1 = bboxes[i][1]
-        x2 = bboxes[i][2] - x1
-        y2 = bboxes[i][3] - y1
+        x2 = bboxes[i][2]# - x1
+        y2 = bboxes[i][3]# - y1
 
         temp.append([id, labels[i], scores[i], x1, y1, x2, y2])
     return temp
@@ -48,5 +48,5 @@ for nb_batch in trange(len(batches)):
 true_boxes = np.array(true_boxes, dtype=float)
 pred_boxes = np.array(pred_boxes, dtype=float)
 # print(mean_average_precision(pred_boxes, true_boxes, box_format="midpoint", num_classes=5))
-print(mean_average_precision(pred_boxes, true_boxes, box_format="midpoint", num_classes=5).item())
+print(mean_average_precision(pred_boxes, true_boxes, box_format="corners", num_classes=5).item())
 # approx 87%!!!
