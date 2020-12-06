@@ -61,7 +61,7 @@ def clean_segmented_image(seg_img):
         # Find contours of present objects
         contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         # Filter out contours smaller than a certain area
-        threshArea = 5**2 # 10 pix² areas as a minimum
+        threshArea = 4**2 # 16 pix² areas as a minimum
             
         # Put a bounding box on every contour and store its coordinates and class
         for cnt in contours:
@@ -69,7 +69,7 @@ def clean_segmented_image(seg_img):
             x,y,w,h = cv2.boundingRect(cnt)
             # Store it if its area is bigger than threshold. This way, we can also avoid considering little
             # contours caused by noise, without affecting the shape of the detected objects
-            if (w*h) > threshArea:
+            if ((w*h) > threshArea) and (w > 0) and (h > 0):
                 # Create box np.array with appropriate format
                 box = np.array([x, y, x+w, y+h])
                 # Store current box and class
@@ -117,6 +117,11 @@ while True:
             boxes, classes = clean_segmented_image(segmented_obs)
             # Only store observations that have at least one class
             if len(boxes) > 0:
+                #im = cv2.cvtColor(obs, cv2.COLOR_RGB2BGR)
+                #for box in boxes:
+                #    im = cv2.rectangle(im,(box[0],box[1]),(box[2],box[3]),(0,255,0),2)
+                #cv2.imshow('im',im)
+                #cv2.waitKey(0)
                 save_npz(obs, boxes, classes)
                 dataset_size += 1
                 print('data sample %s collected' % dataset_size)

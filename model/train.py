@@ -3,6 +3,7 @@ import os
 
 import torch
 import torchvision
+from torchvision.transforms.functional import to_tensor
 from engine import train_one_epoch
 import utils
 
@@ -28,6 +29,7 @@ class Dataset(object):
         with np.load(self.path + f'/{file}') as data:
             # Retrieve data
             img, boxes, classes = tuple([data[f"arr_{i}"] for i in range(3)])
+            img = to_tensor(img)
             # Convert to tensor
             boxes = torch.as_tensor(boxes, dtype=torch.float32)
             classes = torch.as_tensor(classes, dtype=torch.int64)
@@ -61,7 +63,7 @@ def main():
     dataset = Dataset('..', None)
     # Define training dataloader
     data_loader = torch.utils.data.DataLoader(
-        dataset, batch_size=1,shuffle=True, num_workers=4, collate_fn=utils.collate_fn
+        dataset, batch_size=2,shuffle=True, num_workers=4, collate_fn=utils.collate_fn
     )
     # Define model
     model = Model()
@@ -85,7 +87,7 @@ def main():
         lr_scheduler.step()
     
     print('Training complete! Saving weights...')
-    torch.save(model.state_dict(), './weights')
+    torch.save(model.state_dict(), './weights/model.pt')
     print('Weights saved!')
 
 if __name__ == "__main__":
